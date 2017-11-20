@@ -1,0 +1,6 @@
+-
+  bcm: 2
+  video: /home/pi/thing.mov
+-
+  bcm: 5
+  video: /tmp/mov.mov
