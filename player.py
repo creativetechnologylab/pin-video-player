@@ -29,6 +29,8 @@ class Player:
         self.load(pin_map)
         
         for bcm, video in self.pins.items():
+            pi.set_mode(bcm, pigpio.INPUT)
+            pi.set_pull_up_down(bcm, pigpio.PUD_UP)
             pi.callback(bcm, pigpio.FALLING_EDGE, self.__gpio_change)
 
     def load(self, pin_map):
@@ -50,7 +52,10 @@ class Player:
 
         
     def __gpio_change(self, bcm, level, t):
-        print(gpio, level, t)
+        if hasattr(self, 'last_update'):
+            if time.time() - self.last_update < 1:
+                return
+        
         if bcm in self.pins:
-            vlc.play(self.pins[bcm])
-
+            self.vlc.play(self.pins[bcm])
+            self.last_update = time.time()
