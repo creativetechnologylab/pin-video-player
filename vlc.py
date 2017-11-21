@@ -20,7 +20,7 @@ class VLC:
         return VLC._instance
     
     def __init__(self):
-        self.vlc = subprocess.Popen(['vlc'])
+        self.vlc = subprocess.Popen(['vlc'], stdout=subprocess.PIPE)
         VLC.pid = self.vlc.pid
         logging.info('opened VLC ({})'.format(VLC.pid))
 
@@ -47,8 +47,9 @@ class VLC:
         self._control('in_enqueue', input=path)
         self.update_playlist()
         
-    def play(self, name):
-
+    def play(self, path):
+        name = os.path.basename(path)
+        
         if name not in self.playlist:
             self.update_playlist()
         
@@ -68,3 +69,6 @@ class VLC:
         
         logging.info('updated playlist, {} items'.format(len(self.playlist)))
         
+
+    def fullscreen(self):
+        self._control('fullscreen')

@@ -15,23 +15,26 @@ except ModuleNotFoundError:
     pi = Pi()
 
 from vlc import VLC
+import omx
 
 class NoPinException(Exception):
     pass
 
-class NoVideoException(Exception):
+class BadAssetException(Exception):
     pass
 
 class Player:
     def __init__(self, pin_map):
         self.vlc = VLC()
-        time.sleep(1)
+        #self.vlc.fullscreen()
+        time.sleep(2)
         self.load(pin_map)
         
         for bcm, video in self.pins.items():
             pi.set_mode(bcm, pigpio.INPUT)
             pi.set_pull_up_down(bcm, pigpio.PUD_UP)
             pi.callback(bcm, pigpio.FALLING_EDGE, self.__gpio_change)
+
 
     def load(self, pin_map):
         self.pins = {}
@@ -45,10 +48,17 @@ class Player:
                 raise NoPinException('Error in pin map, either specify a bcm or gpio pin')
 
             try:
-                self.pins[bcm] = path.basename(e['video'])
-                self.vlc.add(e['video'])
+                asset = {
+                    'image': e['image'],
+                }
+
+                if 'video' in e:
+                    asset['video'] = e['video']
+
+                self.pins[bcm] = asset
+                self.vlc.add(asset['image'])
             except AttributeError:
-                raise NoVideoException('Specify a video!')
+                raise BadAssetException('')
 
         
     def __gpio_change(self, bcm, level, t):
@@ -57,5 +67,9 @@ class Player:
                 return
         
         if bcm in self.pins:
-            self.vlc.play(self.pins[bcm])
+            asset = self.pins[bcm]
+            self.vlc.play(asset['image'])
+            # self.vlc.fullscreen()
+            if 'video' in asset:
+                omx.play(asset['video'])
             self.last_update = time.time()
