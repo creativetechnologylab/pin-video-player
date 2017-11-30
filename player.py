@@ -59,9 +59,9 @@ class Player:
             try:
                 asset = {
                     'image': pygame.image.load(e['image']),
+                    'imagepath': e['image'],
                 }
-                image = path.basename(e['image'])
-                logging.info('added {}'.format(image))
+                logging.info('added {}'.format(asset['imagepath']))
 
 
                 if 'video' in e:
@@ -88,8 +88,9 @@ class Player:
                 
         
     def __gpio_change(self, bcm, level, t):
+        print(bcm, level)
         if hasattr(self, 'last_update'):
-            if time.time() - self.last_update < 2:
+            if bcm == self.last_bcm and time.time() - self.last_update < 2:
                 return
         
         if bcm in self.pins:
@@ -101,7 +102,8 @@ class Player:
             time.sleep(1)
             self.surface.blit(asset['image'], (0, 0))
             pygame.display.update()
-            logging.info('dislaying {}'.format(asset['image']))
+            logging.info('dislaying {}'.format(asset['imagepath']))
 
 
         self.last_update = time.time()
+        self.last_bcm = bcm
