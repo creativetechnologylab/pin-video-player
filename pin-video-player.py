@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 pin-video-player.py
 
@@ -22,10 +23,13 @@ logging.basicConfig(level=logging.INFO)
 if __name__ == "__main__":
 
     args = docopt(__doc__, version=0.1)
-    # yaml.load(pin_map_path)
     pin_map = yaml.load(open(args['<pin-map>']))
-    print(pin_map)
     player = Player(pin_map)
 
-    _ = input()
+    try:
+        player.wait_for_key()
+    except KeyboardInterrupt:
+        pass
+
+    
     
